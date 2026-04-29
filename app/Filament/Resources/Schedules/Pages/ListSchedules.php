@@ -5,6 +5,10 @@ namespace App\Filament\Resources\Schedules\Pages;
 use App\Filament\Resources\Schedules\ScheduleResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Auth;
+use Override;
 
 class ListSchedules extends ListRecords
 {
@@ -15,5 +19,17 @@ class ListSchedules extends ListRecords
         return [
             CreateAction::make(),
         ];
+    }
+
+    #[Override]
+    protected function getTableQuery(): Builder|Relation|null
+    {
+        $query = parent::getTableQuery();
+
+        if (Auth::user()->hasRole('super_admin')) {
+            return $query;
+        }
+
+        return $query->where('user_id', Auth::id());
     }
 }
