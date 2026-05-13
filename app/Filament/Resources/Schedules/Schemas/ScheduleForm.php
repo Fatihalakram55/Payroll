@@ -30,7 +30,9 @@ class ScheduleForm
                             ->relationship('office', 'name')
                             ->required(),
                         Toggle::make('is_wfa')
-                            ->label('WFA')
+                            ->label('WFA'),
+                        Toggle::make('is_banned')
+                            ->label('Banned'),
                     ])
                 ])
             ]);
