@@ -9,14 +9,14 @@ use Illuminate\Support\Carbon;
 class Attendance extends Model
 {
     protected $guarded = ['id'];
-    protected $user = ['user'];
-
+    protected $with = ['user'];
+    
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function isLate() 
+    public function isLate()
     {
         $scheduleStartTime = Carbon::parse($this->schedule_start_time);
         $startTime = Carbon::parse($this->start_time);
@@ -34,6 +34,24 @@ class Attendance extends Model
         $hours = $duration->h;
         $minutes = $duration->i;
 
-        return $hours . ' Jam '. $minutes . ' Menit';
+        return $hours . ' Jam ' . $minutes . ' Menit'; 
+    }
+
+    public static function booted()
+    {
+        static::saving(function ($attendance) {
+            if ($attendance->start_time && $attendance->end_time) {
+                $start = Carbon::parse($attendance->start_time);
+                $end = Carbon::parse($attendance->end_time);
+
+                if ($end->lessThan($start)) {
+                    $end->addDay();
+                }
+
+                $totalSeconds = $start->diffInSeconds($end);
+
+                $attendance->duration = gmdate('H:i:s', $totalSeconds);
+            }
+        });
     }
 }
