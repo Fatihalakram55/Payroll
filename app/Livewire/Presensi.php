@@ -3,10 +3,10 @@
 namespace App\Livewire;
 use App\Models\Attendance;
 use App\Models\Schedule;
+use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
-use Illuminate\Support\Carbon;
 
 class Presensi extends Component
 {
@@ -49,19 +49,24 @@ class Presensi extends Component
                     'longitude' => $this->longitude,
                     'start_time' => Carbon::now()->toTimeString(),
                     'end_time' => Carbon::now()->toTimeString(),
+                    'duration' => null
                 ]);
 
-            Notification::make()
-                ->title('Presensi berhasil!')
-                ->success()
-                ->body('Presensi berhasil dibuat!')
-                ->send();
-
+                Notification::make()
+                    ->title('Presensi berhasil!')
+                    ->success()
+                    ->body('Presensi berhasil dibuat!')
+                    ->send();
             } else {
+                $startTime = Carbon::parse($attendance->start_time);
+                $endTime = Carbon::now();
+                $duration = $startTime->diff($endTime)->format('%H:%I:%S');
+                
                 $attendance->update([
                     'latitude' => $this->latitude,
                     'longitude' => $this->longitude,
-                    'end_time' => Carbon::now()->toTimeString(),
+                    'end_time' => $endTime->toTimeString(),
+                    'duration' => $duration
                 ]);
 
                 Notification::make()
